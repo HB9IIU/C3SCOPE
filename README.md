@@ -17,7 +17,7 @@ It is the companion to [C3CAST](https://github.com/HB9IIU/C3CAST): transmit your
 - A Windows 10/11 PC and a browser. Chrome or Edge is recommended.
 - A 2.4 GHz antenna on the board's U.FL connector.
 
-No cloud account, no analytics, no Python and no installer. Everything runs on your own PC.
+No cloud account, no analytics, no Python install and no installer. Everything runs on your own PC.
 
 > Use a **separate** board for C3SCOPE. A C3 that is running C3CAST transmitter firmware can stay plugged in, and C3SCOPE will tell you it needs a receiver too.
 
@@ -25,7 +25,7 @@ No cloud account, no analytics, no Python and no installer. Everything runs on y
 
 1. Download **C3SCOPE-portable.zip** from the [Releases](https://github.com/HB9IIU/C3SCOPE/releases) page and unzip it anywhere.
 2. Plug in the receiver C3 with a USB data cable and close any serial monitor that has its port open.
-3. Run **C3SCOPE.exe**. Windows SmartScreen may warn about an unknown publisher, because the exe is not code-signed.
+3. Double-click **C3SCOPE.bat**. A console window opens and shows the address. Windows may ask for confirmation, because the files are not code-signed. Python is bundled, so you install nothing.
 4. Your browser opens at `http://127.0.0.1:8000`. If that port is busy, C3SCOPE uses the next free one up to 8019 and prints the address in the terminal.
 5. The receiver is **detected and connected automatically**. There is no port picker and no browser serial permission prompt.
 6. If the board is blank or has no receiver firmware yet, use the guided setup in the page to flash it.
@@ -45,7 +45,7 @@ python app.py
 powershell -File build_portable.ps1
 ```
 
-This uses PyInstaller and writes `dist\C3SCOPE-portable.zip`. The exe also carries esptool for the guided firmware setup.
+This downloads the official embeddable Python, installs the requirements into it, and writes `dist\C3SCOPE-portable.zip`. It deliberately does not build an exe with PyInstaller, because unsigned PyInstaller exes are often flagged by Windows Defender. The bundled Python also carries esptool for the guided firmware setup.
 
 ## Features
 
