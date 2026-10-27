@@ -8,6 +8,7 @@ if (Test-Path build) { Remove-Item build -Recurse -Force }
 if (Test-Path dist\C3SCOPE) { Remove-Item dist\C3SCOPE -Recurse -Force }
 
 python -m PyInstaller --noconfirm --onedir --name C3SCOPE `
+    --icon branding\c3scope.ico `
     --add-data "viewer;viewer" `
     --collect-all esptool `
     --hidden-import serial.tools.list_ports_windows `
