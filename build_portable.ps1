@@ -24,7 +24,8 @@ if ($LASTEXITCODE -ne 0) { throw 'pip install failed' }
 
 Copy-Item app.py, app_instance.py, app_lifecycle.py, firmware_setup.py -Destination "$out\app"
 Copy-Item viewer -Destination "$out\app\viewer" -Recurse -Exclude '__pycache__'
-Copy-Item README.md, viewer\LICENSE -Destination $out
+Copy-Item viewer\LICENSE -Destination $out
+Copy-Item portable-readme.txt -Destination "$out\README.txt"
 
 Set-Content "$out\C3SCOPE.bat" @(
     '@echo off',

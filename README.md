@@ -32,45 +32,9 @@ No cloud account, no analytics, no Python install and no installer. Everything r
 
 Stop the app with **Quit C3SCOPE** in the header or with Ctrl-C in the console window. Closing the last browser tab also stops it after a 10-second grace period.
 
-### Run from source
-
-```sh
-python -m pip install -r requirements.txt
-python app.py
-```
-
-### Build the portable zip
-
-```powershell
-powershell -File build_portable.ps1
-```
-
-This downloads the official embeddable Python, installs the requirements into it, and writes `dist\C3SCOPE-portable.zip`. It deliberately does not build an exe with PyInstaller, because unsigned PyInstaller exes are often flagged by Windows Defender. The bundled Python also carries esptool for the guided firmware setup.
+More for tinkerers (running from source, LAN access, building the zip): see [DEVELOPMENT.md](DEVELOPMENT.md).
 
 ## Features
-
-### Access from another PC on your LAN
-
-Start the host PC with the ESP connected:
-
-```sh
-python app.py --lan --no-browser
-```
-
-Open the **LAN viewer** URL printed in the terminal on the other PC, for example
-`http://192.168.1.50:8000`. The selected port may differ if 8000 is occupied.
-Only one tab controls the receiver at a time: close an existing viewer before
-opening it elsewhere. `--lan` keeps the host running after tabs close. Stop it
-with Ctrl-C, or use **Quit C3SCOPE** at the host's `http://127.0.0.1:PORT` address.
-Firmware installation, erasing and quitting are blocked for remote PCs.
-Use this mode on your trusted LAN. If Windows asks, allow access on your private
-network; the host firewall must allow the chosen port. No router port forwarding
-is needed. Without `--lan`, the existing local-only automatic shutdown remains.
-C3SCOPE runs as a single instance: starting it again reuses the existing app
-instead of launching another scanner. To switch a running local app into LAN
-mode, quit it first, then start it with `--lan`.
-
-### Viewer features
 
 - Live **spectrum and waterfall** that share one frequency axis, cropped to **2401.000–2410.000 MHz**.
 - **QO-100 · DATV preset**: 2406 MHz centre, 16 MS/s nominal span, 2048 bins where the firmware offers them. **Reset QO-100 view** brings it back at any time.
@@ -79,23 +43,8 @@ mode, quit it first, then start it with `--lan`.
 - Pause and resume, and averaging.
 - **Experimental DATV hints** under the waterfall: estimated signal centre and a rounded symbol rate, for roughly 50 kS/s to 2.4 MS/s.
 - Automatic rediscovery when you unplug and replug the receiver.
-- Guided firmware setup for the XIAO ESP32-C3.
-- Receiver firmware updates use the same guided installer. **Setup → Reinstall
-  receiver firmware…** is also available for recovery, even without an update.
-  Reviewing or cancelling leaves reception running; confirming pauses reception,
-  erases the selected board, installs and verifies the bundled firmware, and
-  reconnects automatically. Settings and files on the PC are not erased.
-- **Setup → Erase ESP32…** completely erases the selected XIAO after explicit
-  confirmation and leaves it blank. It does not install replacement firmware;
-  use guided setup afterward to make it a C3SCOPE receiver again.
-
-## How it works
-
-```
-XIAO ESP32-C3 (ESP-SDR)  <--USB-->  Python / Flask (pyserial)  <--WebSocket-->  browser
-```
-
-The firmware captures the 2.4 GHz band and sends processed FFT spectra. The Python app owns the serial port, probes for a confirmed ESP-SDR receiver, and passes the data to the page over a local WebSocket. One viewer tab controls the receiver at a time.
+- **Guided firmware setup** for the XIAO ESP32-C3, including reinstall and erase, from the **Setup** menu.
+- Optional viewing from another PC on your LAN.
 
 ## Good to know
 
@@ -119,18 +68,9 @@ The firmware captures the 2.4 GHz band and sends processed FFT spectra. The Pyth
 
 ## Status
 
-Version: pre-release, work in progress.
+**Version 1.0.0-beta.1.** The automated checks pass.
 
-Done: baseline inspection, branding, QO-100 preset and crop, and automatic USB discovery. The automated checks pass.
-
-Run them with Node.js (used only for tests):
-
-```sh
-node --test viewer/tests/*.test.mjs
-python -m unittest
-```
-
-**Not yet verified in a browser or with real hardware:** the preset, the crop edges, RF orientation and the DATV hints still need checking against known signals. Outstanding: downlink-equivalent axis, receiver frame-rate and stale-data display, and saved preferences. See [BASELINE.md](BASELINE.md) for the evidence and protocol notes, and [DEVELOPMENT_NOTES.md](DEVELOPMENT_NOTES.md) for developer detail.
+**Not yet verified with real hardware:** the preset, the crop edges, RF orientation and the DATV hints still need checking against known signals. Outstanding: downlink-equivalent axis, receiver frame-rate and stale-data display, and saved preferences.
 
 ## Safety and legal
 
