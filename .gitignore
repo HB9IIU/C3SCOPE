@@ -4,3 +4,9 @@ ChatGPT Image*.png
 build/
 dist/
 *.spec
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+.venv/

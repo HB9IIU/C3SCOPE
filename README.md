@@ -109,9 +109,9 @@ The accuracy of the DATV hints and of the band edges is still being compared aga
 
 - **ESP-SDR firmware and ESP-WebSDR viewer: ESPARGOS** ([esp-sdr](https://github.com/ESPARGOS/esp-sdr), [esp-web-sdr](https://github.com/ESPARGOS/esp-web-sdr)), by Florian Euchner and Zoltan Doczi. The on-chip spectrum mode was contributed by [z2labs.io](https://www.z2labs.io). All the clever part is their work. This is an independent adaptation; no ESPARGOS endorsement is implied.
 
-**Licence: GPL-3.0-or-later for the viewer** (`viewer/`, a clone of ESP-WebSDR; see [viewer/LICENSE](viewer/LICENSE)). Its original history and third-party notices
-(`viewer/flasher/vendor/`, `viewer/fonts.css`) are kept unchanged. The [ESP-SDR firmware](https://github.com/ESPARGOS/esp-sdr) is licensed separately.
-A licence for the Python launcher in this folder has not been chosen yet.
+**Licence: GPL-3.0-or-later** for original C3SCOPE code, including the Python launcher, and the adapted viewer. See [LICENSE](LICENSE) and [COPYING.md](COPYING.md). Upstream licensing and third-party notices
+(`viewer/flasher/vendor/`, `viewer/fonts.css`) are retained. This repository contains an adapted source snapshot;
+upstream history is available in the linked ESPARGOS repositories. The [ESP-SDR firmware](https://github.com/ESPARGOS/esp-sdr) is licensed separately.
 
 The portable package bundles the official embeddable **Python** (PSF licence), plus Flask, pyserial and esptool, each under its own licence.
 

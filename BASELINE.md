@@ -1,5 +1,10 @@
 # Baseline inspection — 26 October 2026
 
+> Historical notes from the initial inspection. The current C3SCOPE app uses
+> Flask/pyserial, includes a guided installer and bundled firmware, and has
+> since received browser and hardware testing. See `DEVELOPMENT.md` and
+> `third_party/firmware/README.md` for the current architecture and provenance.
+
 ## Provenance
 
 - Frontend: https://github.com/ESPARGOS/esp-web-sdr

@@ -1,0 +1,7 @@
+{
+  "version": "3.13.17",
+  "python_tag": "313",
+  "url": "https://www.python.org/ftp/python/3.13.17/python-3.13.17-embeddable-amd64.zip",
+  "sha256": "0ba1ee4bfcbdc3a559d27e2e9ce76d04a7839947a23f46375872c755c0d463b8",
+  "source_manifest": "https://www.python.org/ftp/python/3.13.17/windows-3.13.17.json"
+}

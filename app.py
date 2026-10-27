@@ -21,12 +21,15 @@ from werkzeug.serving import make_server, ThreadedWSGIServer
 from firmware_setup import SetupInstaller, fingerprint
 from app_lifecycle import ViewerSessions
 from app_instance import AppInstance
+from serial_policy import validate_remote_write
 
 ROOT = Path(__file__).resolve().parent
 app = Flask(__name__, static_folder=str(ROOT / 'viewer'), static_url_path='')
-app.config['SOCK_SERVER_OPTIONS'] = {'ping_interval': 10}
+app.config['SOCK_SERVER_OPTIONS'] = {'ping_interval': 10, 'max_message_size': 131072}
 app.config['LAN_ENABLED'] = False
 app.config['LAN_URLS'] = []
+app.config['TRUSTED_HOSTS'] = ['localhost', '127.0.0.1', '[::1]']
+app.config['MAX_CONTENT_LENGTH'] = 16384
 sock = Sock(app)
 IDENTITY = re.compile(rb'^(ESP32|C2|C3|C5|C6|C61|H2|S2|S3|S31)SDR 6 burst \d+$')
 probe_status = {'state': 'searching', 'message': 'Connect an ESP-SDR receiver by USB. Detection is automatic.'}
@@ -123,6 +126,7 @@ class Receiver:
         self.port_signature = None
         self.executor = None
         self.probes = {}
+        self.probe_fingerprints = {}
         self.next_probe = {}
         self.reports = {}
         self.setup_reserved = False
@@ -187,7 +191,8 @@ class Receiver:
         with self.lock:
             if self.setup_reserved:
                 return
-            if self.port and not self.leased and self.info.device not in ports:
+            if self.port and not self.leased and (self.info.device not in ports
+                    or fingerprint(self.info) != fingerprint(ports[self.info.device])):
                 self.close()
             for device, future in list(self.probes.items()):
                 if not future.done():
@@ -195,6 +200,13 @@ class Receiver:
                 del self.probes[device]
                 self.next_probe[device] = time.monotonic() + 5
                 found, report = future.result()
+                expected = self.probe_fingerprints.pop(device, None) or report.get('fingerprint')
+                if device not in ports or (expected and tuple(expected) != fingerprint(ports[device])):
+                    if found:
+                        found[0].close()
+                    self.reports.pop(device, None)
+                    self.next_probe.pop(device, None)
+                    continue
                 if device in ports:
                     self.reports[device] = report
                 if found:
@@ -207,6 +219,10 @@ class Receiver:
             for device in set(self.reports) - set(ports):
                 self.reports.pop(device, None)
                 self.next_probe.pop(device, None)
+            for device, report in list(self.reports.items()):
+                if report.get('fingerprint') and tuple(report['fingerprint']) != fingerprint(ports[device]):
+                    self.reports.pop(device, None)
+                    self.next_probe.pop(device, None)
             report = next((r for r in self.reports.values() if r.get('state') == 'incompatible'), None)
             report = report or next((r for r in self.reports.values() if r.get('state') == 'unrecognized'), None)
             probe_status.update(report or {'state': 'searching', 'message': 'Connect an ESP-SDR receiver by USB. Detection is automatic.'})
@@ -214,6 +230,7 @@ class Receiver:
                 for info in sorted(ports.values(), key=lambda p: p.vid != 0x303a):
                     if info.device not in self.probes and time.monotonic() >= self.next_probe.get(info.device, 0):
                         self.probes[info.device] = self.executor.submit(self.probe, info)
+                        self.probe_fingerprints[info.device] = fingerprint(info)
 
 
 receiver = Receiver()
@@ -311,7 +328,10 @@ def local_setup_request():
         raise ValueError('Firmware operations and quitting are available only on the host PC.')
     if request.headers.get('Origin') != f'http://{request.host}' or not request.is_json:
         raise ValueError('Requests must come from this local C3SCOPE page.')
-    return request.get_json()
+    data = request.get_json()
+    if not isinstance(data, dict):
+        raise ValueError('Expected a JSON object.')
+    return data
 
 
 @app.post('/api/setup/prepare')
@@ -375,6 +395,7 @@ def bridge(ws):
     if request.headers.get('Origin') != f'http://{request.host}':
         ws.close()
         return
+    remote = not local_browser()
     with receiver.lock:
         if receiver.setup_reserved or receiver.leased or not receiver.port:
             ws.send(json.dumps({'error': 'Receiver unavailable or already in use'}))
@@ -387,13 +408,20 @@ def bridge(ws):
         while not receiver.stop.is_set():
             message = ws.receive(timeout=.001)
             if isinstance(message, bytes):
+                if remote:
+                    validate_remote_write(message)
                 port.write(message)
             elif isinstance(message, str):
                 command = json.loads(message)
                 if command['op'] == 'open':
+                    if remote and command.get('baudRate') not in (115200, 1000000, 2000000):
+                        raise ValueError('Unsupported receiver baud rate.')
                     port.baudrate = int(command['baudRate'])
                 elif command['op'] == 'signals':
                     signals = command['signals']
+                    if remote and (signals.get('requestToSend') not in (None, False)
+                                   or set(signals) - {'dataTerminalReady', 'requestToSend'}):
+                        raise ValueError('Bootloader control is not available to LAN viewers.')
                     if 'dataTerminalReady' in signals:
                         port.dtr = bool(signals['dataTerminalReady'])
                     if 'requestToSend' in signals:
@@ -485,6 +513,8 @@ def run_server(port, open_browser, lan, instance=None):
     app.config['LAN_ENABLED'] = lan
     server = create_local_server(port, host='0.0.0.0' if lan else '127.0.0.1')
     app.config['LAN_URLS'] = lan_urls(server.server_port) if lan else []
+    from urllib.parse import urlsplit
+    app.config['TRUSTED_HOSTS'] = ['localhost', '127.0.0.1', '[::1]'] + [urlsplit(u).hostname for u in app.config['LAN_URLS']]
     # A bounded accept wait lets Windows process console signals promptly.
     server.timeout = .25
     scanner = threading.Thread(target=receiver.scan, daemon=True)

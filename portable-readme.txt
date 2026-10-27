@@ -18,5 +18,9 @@ NOTES
 - C3SCOPE only listens. Never connect a transmitter output directly to the C3.
 - DATV hints are experimental and do not confirm DATV.
 
-Based on ESPARGOS ESP-SDR / ESP-WebSDR (GPL-3.0-or-later, see LICENSE).
+Based on ESPARGOS ESP-SDR / ESP-WebSDR (GPL-3.0-or-later).
+Original C3SCOPE code: GPL-3.0-or-later. See COPYING.md and LICENSE.
+Licenses and attribution: THIRD_PARTY.md and app/viewer/LICENSE.
+Application sources: C3SCOPE-source.zip, published next to this download on the Releases page.
+Receiver firmware sources and build references: third_party/firmware/.
 Full documentation: https://github.com/HB9IIU/C3SCOPE

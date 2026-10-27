@@ -15,7 +15,18 @@ Options: `--port N` (first port to try), `--no-browser`, `--lan`.
 powershell -File build_portable.ps1
 ```
 
-This downloads the official embeddable Python, installs the requirements into it, and writes `dist\C3SCOPE-portable.zip`. It deliberately does not build an exe with PyInstaller, because unsigned PyInstaller exes are often flagged by Windows Defender. The bundled Python also carries esptool for the guided firmware setup. The zip's plain-text readme comes from `portable-readme.txt`.
+This downloads the checksum-pinned official Windows Python runtime from
+`packaging/windows-runtime.json`, installs the exact dependencies in
+`requirements-lock.txt`, and writes `dist\C3SCOPE-portable.zip` plus a SHA-256
+file. Only `dist\C3SCOPE` and `build\portable-source` are replaced; unrelated
+files in `dist` are preserved. The build verifies the shipped interpreter,
+native wheels and receiver firmware before creating the zip.
+
+The package includes the application source snapshot, firmware/DSP source
+archives, third-party notices, and `BUILD-INFO.json`. See `THIRD_PARTY.md` and
+`third_party/firmware/README.md`. It uses an embeddable Python and `.bat` launcher
+rather than a PyInstaller executable. The plain-text readme comes from
+`portable-readme.txt`.
 
 To publish: `gh release upload <tag> dist/C3SCOPE-portable.zip --clobber`.
 
@@ -56,6 +67,10 @@ Firmware installation, erasing and quitting are blocked for remote PCs.
 Use this mode on your trusted LAN. If Windows asks, allow access on your private
 network; the host firewall must allow the chosen port. No router port forwarding
 is needed. Without `--lan`, the existing local-only automatic shutdown remains.
+LAN access uses plain HTTP without authentication; any trusted LAN client can
+claim the available receiver session. Its serial bridge accepts receiver
+commands only. Bootloader packets, GPIO actuation and bootloader control signals
+are not available over LAN. See [SECURITY.md](SECURITY.md).
 C3SCOPE runs as a single instance: starting it again reuses the existing app
 instead of launching another scanner. To switch a running local app into LAN
 mode, quit it first, then start it with `--lan`.

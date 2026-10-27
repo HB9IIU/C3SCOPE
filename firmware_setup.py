@@ -153,6 +153,7 @@ class SetupInstaller:
             with self.receiver.lock:
                 pending = list(self.receiver.probes.values())
                 self.receiver.probes.clear()
+                self.receiver.probe_fingerprints.clear()
             for future in pending:
                 if future.cancel():
                     continue
