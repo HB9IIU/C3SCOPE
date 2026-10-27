@@ -14,28 +14,38 @@ It is the companion to [C3CAST](https://github.com/HB9IIU/C3CAST): transmit your
 
 - A **Seeed Studio XIAO ESP32-C3** (native USB-C) flashed with ESP-SDR receiver firmware. About 5 EUR.
 - A USB **data** cable (not a charge-only cable).
-- A PC with **Python 3** and a browser. Chrome or Edge is recommended.
+- A Windows 10/11 PC and a browser. Chrome or Edge is recommended.
 - A 2.4 GHz antenna on the board's U.FL connector.
 
-No cloud account, no analytics and no build step. Everything runs on your own PC.
+No cloud account, no analytics, no Python and no installer. Everything runs on your own PC.
 
 > Use a **separate** board for C3SCOPE. A C3 that is running C3CAST transmitter firmware can stay plugged in, and C3SCOPE will tell you it needs a receiver too.
 
 ## Quick start
 
-1. Plug in the receiver C3 with a USB data cable and close any serial monitor that has its port open.
-2. Install and start C3SCOPE from this folder:
+1. Download **C3SCOPE-portable.zip** from the [Releases](https://github.com/HB9IIU/C3SCOPE/releases) page and unzip it anywhere.
+2. Plug in the receiver C3 with a USB data cable and close any serial monitor that has its port open.
+3. Run **C3SCOPE.exe**. Windows SmartScreen may warn about an unknown publisher, because the exe is not code-signed.
+4. Your browser opens at `http://127.0.0.1:8000`. If that port is busy, C3SCOPE uses the next free one up to 8019 and prints the address in the terminal.
+5. The receiver is **detected and connected automatically**. There is no port picker and no browser serial permission prompt.
+6. If the board is blank or has no receiver firmware yet, use the guided setup in the page to flash it.
 
-   ```sh
-   python -m pip install -r requirements.txt
-   python app.py
-   ```
+Stop the app with **Quit C3SCOPE** in the header or with Ctrl-C in the console window. Closing the last browser tab also stops it after a 10-second grace period.
 
-3. Your browser opens at `http://127.0.0.1:8000`. If that port is busy, C3SCOPE uses the next free one up to 8019 and prints the address in the terminal.
-4. The receiver is **detected and connected automatically**. There is no port picker and no browser serial permission prompt.
-5. If the board is blank or has no receiver firmware yet, use the guided setup in the page to flash it.
+### Run from source
 
-Stop the app with **Quit C3SCOPE** in the header or with Ctrl-C in the terminal. Closing the last browser tab also stops it after a 10-second grace period.
+```sh
+python -m pip install -r requirements.txt
+python app.py
+```
+
+### Build the portable zip
+
+```powershell
+powershell -File build_portable.ps1
+```
+
+This uses PyInstaller and writes `dist\C3SCOPE-portable.zip`. The exe also carries esptool for the guided firmware setup.
 
 ## Features
 

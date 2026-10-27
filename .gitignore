@@ -1,3 +1,6 @@
 __pycache__/
 *.pyc
 ChatGPT Image*.png
+build/
+dist/
+*.spec

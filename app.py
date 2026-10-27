@@ -3,6 +3,7 @@ import json
 import logging
 import re
 import signal
+import sys
 import threading
 import time
 import webbrowser
@@ -521,6 +522,10 @@ def run_server(port, open_browser, lan, instance=None):
 
 
 if __name__ == '__main__':
+    if getattr(sys, 'frozen', False) and sys.argv[1:2] == ['--esptool']:
+        import esptool
+        esptool.main(sys.argv[2:])
+        raise SystemExit(0)
     parser = argparse.ArgumentParser(description='C3SCOPE spectrum viewer')
     parser.add_argument('--lan', action='store_true', help='Allow LAN viewers; keep running when browser tabs close')
     parser.add_argument('--port', type=int, default=8000, help='First port to try (default: 8000)')

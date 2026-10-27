@@ -13,6 +13,13 @@ from pathlib import Path
 from serial.tools import list_ports
 
 
+def esptool_command():
+    """Portable builds re-run their own exe with --esptool; sources use python -m."""
+    if getattr(sys, 'frozen', False):
+        return [sys.executable, '--esptool']
+    return [sys.executable, '-u', '-m', 'esptool']
+
+
 def fingerprint(info):
     return (info.device, info.vid, info.pid, getattr(info, 'serial_number', None),
             getattr(info, 'location', None), getattr(info, 'hwid', None))
@@ -157,7 +164,7 @@ class SetupInstaller:
             files = [] if erasing else package(self.root)[1]  # Recheck before writing.
             if self.receiver.stop.is_set():
                 raise ValueError('Installation cancelled because C3SCOPE is stopping.')
-            command = [sys.executable, '-u', '-m', 'esptool', '--chip', 'esp32c3',
+            command = [*esptool_command(), '--chip', 'esp32c3',
                        '--port', candidate['device'], '--baud', '460800',
                        '--before', 'default-reset', '--after', 'hard-reset']
             command += ['erase-flash'] if erasing else ['write-flash', '--erase-all', '--flash-mode', 'dio',
