@@ -83,4 +83,4 @@ XIAO ESP32-C3 (ESP-SDR)  <--USB-->  Python / Flask (pyserial)  <--WebSocket-->  
 
 The firmware captures the 2.4 GHz band and sends processed FFT spectra. The Python app owns the serial port, probes for a confirmed ESP-SDR receiver, and passes the data to the page over a local WebSocket. One viewer tab controls the receiver at a time.
 
-See also [BASELINE.md](BASELINE.md) for provenance and protocol notes, and [DEVELOPMENT_NOTES.md](DEVELOPMENT_NOTES.md) for earlier developer notes.
+See also [BASELINE.md](BASELINE.md) for provenance and protocol notes.
