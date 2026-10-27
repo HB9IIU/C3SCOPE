@@ -2,26 +2,36 @@
 
 ### The 5 EUR QO-100 spectrum viewer
 
-**Plug. Connect. Watch.** A small web viewer for the QO-100 DATV uplink band (2401–2410 MHz), from a low-cost ESP32-C3 board. **Windows 10/11.**
+**Plug. Flash. Play.** A small web viewer for the QO-100 DATV uplink band (2401–2410 MHz), from a low-cost ESP32-C3 board. **Windows 10/11.**
 
 The board costs about 5 EUR. You also need a 2.4 GHz antenna, and a second C3 if you want to watch your own [C3CAST](https://github.com/HB9IIU/C3CAST) signal: see [Please read before using](#please-read-before-using).
 
-<!-- Demo video goes here, as in C3CAST: a linked thumbnail, centered. -->
+**[C3CAST](https://github.com/HB9IIU/C3CAST) sends the picture. C3SCOPE shows the signal.**
+
+<p align="center">
+  <a href="https://youtu.be/MQYMM_HdiUQ">
+    <img src="docs/c3scope-banner.png" alt="Play the C3SCOPE demo video: transmit your picture with C3CAST, watch your signal with a second ESP32-C3" width="720">
+  </a>
+  <br>
+  <b>&#9654; Press to play the demo video</b>
+</p>
 
 <h1 align="center"><a href="https://github.com/HB9IIU/C3SCOPE/releases">&#11015; Download C3SCOPE for Windows</a></h1>
 <p align="center">Windows 10/11 &nbsp;·&nbsp; no installation &nbsp;·&nbsp; unzip and double-click</p>
 
 C3SCOPE is a simple helper around the excellent **[ESP-SDR](https://github.com/ESPARGOS/esp-sdr)** receiver firmware and
 **[ESP-WebSDR](https://github.com/ESPARGOS/esp-web-sdr)** viewer by **ESPARGOS**. Their work does the real job: it turns the
-ESP32-C3's own Wi-Fi radio into a raw I/Q receiver and draws the spectrum in a browser. Please read their projects for how it works and its limits; this page does not repeat them.
+ESP32-C3's own Wi-Fi radio into a receiver and makes its spectrum available in a browser. Please read their projects for how it works and its limits; this page does not repeat them.
 
-<h1 align="center">🔌 PLUG &nbsp;·&nbsp; 🔗 CONNECT &nbsp;·&nbsp; 👁 WATCH</h1>
+<h1 align="center">🔌 PLUG &nbsp;·&nbsp; ⚡ FLASH &nbsp;·&nbsp; ▶ PLAY</h1>
 
 C3SCOPE only wraps it for a **Seeed Studio XIAO ESP32-C3** and for the QO-100 uplink, so that a ham can see the band without a toolchain:
 
 1. **Plug** a second XIAO into a USB port (the native USB port, no extra adapter).
-2. **Connect**: C3SCOPE finds the board by itself. A brand-new blank board can be flashed from the page.
-3. **Watch**: the live spectrum and waterfall of 2401–2410 MHz appear in your browser.
+2. **Flash** it from the page: C3SCOPE finds the board, offers the bundled receiver firmware, and asks before erasing anything. A brand-new blank board works too.
+3. **Play**: watch the live spectrum and waterfall, zoom into a signal, and let C3SCOPE estimate its centre frequency and symbol rate.
+
+Already running compatible receiver firmware? It connects automatically and goes straight to the spectrum.
 
 by HB9IIU
 
@@ -37,17 +47,18 @@ thumb-sized board that costs about 5 EUR / USD (shop and shipping change that).
 - **U.FL connector** (bottom centre): the RF input. Use a small 2.4 GHz antenna. Never connect a transmitter output to it.
 - **B / R buttons:** boot and reset. If a board is ever not found, hold **B** while plugging it in to force download mode.
 
-The receiving is done by the chip's own Wi-Fi radio, driven by the ESP-SDR firmware; there is no other RF hardware on the board.
+Reception uses the chip's own Wi-Fi radio, driven by the ESP-SDR firmware; there is no other RF hardware on the board.
 Use a **separate** board for C3SCOPE: your C3CAST transmitter can stay plugged in, and C3SCOPE will tell you it needs a receiver too.
 
 ## What you get
 
-- **Spectrum and waterfall** that share one frequency axis, cropped to **2401.000–2410.000 MHz**, with a frequency cursor and relative level.
-- **QO-100 · DATV preset**: 2406 MHz centre, 16 MS/s nominal span, 2048 bins where the firmware offers them. **Reset QO-100 view** brings it back at any time.
-- **Display controls**: manual RX gain, **Auto Scale** and **Auto Floor** (display levels only), averaging, pause and resume.
-- **Experimental DATV hints** under the waterfall: estimated signal centre and a rounded symbol rate, for roughly 50 kS/s to 2.4 MS/s.
+- **Flash from the page**: installs the bundled ESP-SDR receiver firmware over the same USB cable. It only flashes the board you pick and confirm. No Arduino IDE or PlatformIO needed.
+- **Spectrum and waterfall**: one frequency axis covering **2401.000–2410.000 MHz**, with a frequency cursor and relative level. Wheel to zoom, drag to pan; **Full span** brings the whole window back.
+- **Ready-to-use settings**: the QO-100 preset selects 2406 MHz centre, 16 MS/s nominal sample rate and 2048 bins where offered. Startup uses **Manual gain, index 0**, with **Auto Scale** and **Auto Floor** on.
+- **Receiver and display controls**: manual RX gain or hardware AGC, averaging, Max Hold, pause and resume. Auto Scale and Auto Floor adjust the display; they do not change RX gain. Collapse the controls to give the spectrum more room.
+- **Experimental DATV hints**: cyan markers on probable signals, plus an estimated centre frequency and symbol rate below the waterfall. Spectrum estimates only, for roughly 50 kS/s to 2.4 MS/s; nothing is decoded.
 - **Finds the board by itself**, and finds it again when you unplug and replug it. No port picker, no browser permission prompt.
-- **Guided firmware setup** for the XIAO ESP32-C3, including reinstall and erase, from the **Setup** menu. It only flashes the board you pick and confirm.
+- **Firmware maintenance**: an update prompt when newer bundled firmware is available, plus **Reinstall receiver firmware…** and **Erase ESP32…** under Setup. Each operation needs explicit confirmation.
 - **Runs offline**, on your own PC: no cloud account, no analytics, no Python install. Optional viewing from another PC on your LAN.
 
 ## Quick start (Windows)
@@ -55,21 +66,24 @@ Use a **separate** board for C3SCOPE: your C3CAST transmitter can stay plugged i
 No installation, no Python, no drivers to set up:
 
 1. Download the portable package **C3SCOPE-portable.zip** from the [Releases page](https://github.com/HB9IIU/C3SCOPE/releases) and unzip it anywhere.
-2. Double-click **C3SCOPE.bat**. A console window opens (close it to quit) and your browser shows the page. Windows may ask for confirmation, because the files are not code-signed.
+2. Double-click **C3SCOPE.bat**. A console window opens and your browser shows the page. Windows may ask for confirmation, because the files are not code-signed.
 3. Plug in the XIAO with a USB **data** cable and close any serial monitor that has its port open. C3SCOPE connects by itself.
-4. If the board is blank or has no receiver firmware yet, press **Setup** in the page and let the guided setup flash it.
-5. **Watch** the spectrum. Use **Reset QO-100 view** to come back to 2401–2410 MHz.
+4. If the board is blank, choose **Install receiver firmware…** on the waiting screen. Check the selected board and confirm the erase warning. C3SCOPE installs and verifies the firmware, then connects automatically.
+5. **Watch your signal.** Use **Full span** to return to 2401–2410 MHz and **Hide controls** for a wider plot.
 
-**Quit C3SCOPE** in the page header (or Ctrl-C in the console window) ends the app. Closing the last browser tab also stops it after 10 seconds.
+If the page says **C3CAST transmitter detected**, leave that board as it is and plug in a second XIAO for the receiver.
+
+**Pause** freezes acquisition; **Quit C3SCOPE** ends the app and releases USB. Ctrl-C in the console window also quits.
+In normal local mode, closing the last viewer tab stops the app after 10 seconds. LAN mode stays running until you quit it on the host.
 If port 8000 is busy, C3SCOPE uses the next free one up to 8019 and prints the address in the console.
 
 ## Please read before using
 
-- **C3SCOPE only listens.** Never connect a transmitter output directly to the C3's RF connector. If you test with a transmitter, use low power, an attenuator or a dummy load.
+- **C3SCOPE only listens.** Never connect a transmitter output directly to the C3's RF connector. For a nearby transmitter test, start at low power into a suitable dummy load, with the receiver on its own antenna. A wired test needs suitable attenuation.
 - **Local uplink only.** It shows RF near 2.4 GHz, not the 10 GHz satellite downlink. The window is a viewing range, not a transmission authorisation, and no signal on screen does not mean a satellite slot is free: always listen first.
 - **Relative levels.** Amplitude is relative dBFS, **not calibrated dBm**. Changing gain changes what you see.
 - **Snapshots with gaps.** The C3 captures snapshots, not continuous I/Q. A spike at the centre can be receiver DC/LO leakage, not a real signal.
-- **DATV hints are hints.** They do not decode DVB, identify modulation or FEC, or confirm DATV. See [ETSI TR 102 376](https://www.etsi.org/deliver/etsi_tr/102300_102399/102376/01.01.01_60/tr_102376v010101p.pdf) for the background.
+- **DATV hints are hints.** Other signals can resemble DATV. The estimates do not decode DVB, identify modulation or FEC, or confirm DATV. See [ETSI TR 102 376](https://www.etsi.org/deliver/etsi_tr/102300_102399/102376/01.01.01_60/tr_102376v010101p.pdf) for the background.
 
 ## Bench test with C3CAST
 
@@ -85,7 +99,9 @@ The accuracy of the DATV hints and of the band edges is still being compared aga
 
 - **Windows 10/11** is what the portable package is built for. Python and a browser are all that is needed to run from source on other systems, but that is untested.
 - **The receiver is not found:** check that the cable carries data and that no other program (serial monitor, browser flasher) has the port open.
-- **"We found your ESP32 ... running DATV transmitter firmware":** that board is your C3CAST modulator. Plug in a second C3.
+- **C3CAST transmitter detected:** keep it as your transmitter and plug in a second XIAO. Choosing **Convert to C3SCOPE…** replaces its firmware; it will no longer work as a transmitter until C3CAST firmware is reinstalled.
+- **Erase ESP32…** leaves the board blank. It does not install replacement firmware. Files and settings on your PC are not erased.
+- **Another viewer is connected:** one browser tab controls the receiver at a time. Close the other viewer before switching PCs. Starting C3SCOPE again reuses the running app.
 - **The preset says it cannot apply:** the firmware does not advertise a 16 MS/s on-chip spectrum profile. C3SCOPE then keeps the upstream defaults and tells you why.
 - Running from source, the LAN mode, tests and how to build the zip are in [DEVELOPMENT.md](DEVELOPMENT.md). Provenance and protocol notes are in [BASELINE.md](BASELINE.md).
 
