@@ -92,7 +92,6 @@ Not built yet: a downlink-equivalent frequency axis, receiver frame-rate and sta
 ## Credits and licence
 
 - **ESP-SDR firmware and ESP-WebSDR viewer: ESPARGOS** ([esp-sdr](https://github.com/ESPARGOS/esp-sdr), [esp-web-sdr](https://github.com/ESPARGOS/esp-web-sdr)), by Florian Euchner and Zoltan Doczi. The on-chip spectrum mode was contributed by [z2labs.io](https://www.z2labs.io). All the clever part is their work. This is an independent adaptation; no ESPARGOS endorsement is implied.
-- **SP8ESA**: ESP32-DATV, the base of C3CAST.
 
 **Licence: GPL-3.0-or-later for the viewer** (`viewer/`, a clone of ESP-WebSDR; see [viewer/LICENSE](viewer/LICENSE)). Its original history and third-party notices
 (`viewer/flasher/vendor/`, `viewer/fonts.css`) are kept unchanged. The [ESP-SDR firmware](https://github.com/ESPARGOS/esp-sdr) is licensed separately.
