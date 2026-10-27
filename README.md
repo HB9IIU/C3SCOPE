@@ -78,8 +78,8 @@ transmission appear and disappear in the 2401–2410 MHz window. It is a quick *
 
 ## Status
 
-Version **1.0.0-beta.1** (first beta). The automated checks pass. **Not yet verified with real hardware:** the preset, the crop edges, RF orientation and the DATV hints still need checking against known signals.
-Not built yet: a downlink-equivalent frequency axis, receiver frame-rate and stale-data display, and saved preferences.
+Version **1.0.0-beta.1** (first beta). It runs with a XIAO ESP32-C3 receiver on the author's bench: live spectrum and waterfall of 2401-2410 MHz.
+The accuracy of the DATV hints and of the band edges is still being compared against known signals, and a downlink-equivalent frequency axis is not built yet.
 
 ## Notes
 
