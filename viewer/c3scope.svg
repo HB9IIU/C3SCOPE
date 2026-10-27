@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-label="C3SCOPE spectrum and radio waves">
+  <rect x="2" y="2" width="508" height="508" rx="112" fill="#0b0f13" stroke="#2f3c48" stroke-width="4"/>
+  <g fill="none" stroke="#f0a52c" stroke-width="24" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M141 151a165 165 0 0 0 0 210M371 151a165 165 0 0 1 0 210"/>
+    <path d="M181 190a105 105 0 0 0 0 132M331 190a105 105 0 0 1 0 132" opacity=".65"/>
+    <path d="M158 284h42l22-37 34-95 34 95 22 37h42"/>
+  </g>
+  <path d="M182 350h148" stroke="#52616d" stroke-width="8" stroke-linecap="round"/>
+</svg>

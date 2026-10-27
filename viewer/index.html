@@ -1,0 +1,317 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>C3SCOPE · Spectrum viewer by HB9IIU</title>
+    <link rel="icon" type="image/svg+xml" href="c3scope.svg" />
+    <link rel="stylesheet" href="instrument.css" />
+    <script defer src="serial-transport.js"></script>
+    <script defer src="radio.js"></script>
+    <script defer src="datv.js"></script>
+    <script defer src="app.js"></script>
+  </head>
+  <body>
+    <header>
+      <div class="brand">
+        <img class="brand-mark" src="c3scope.svg" alt="C3SCOPE" width="44" height="44" />
+        <div class="brand-plate">
+          <h1>C3<span>SCOPE</span></h1>
+          <span class="brand-call">by HB9IIU</span>
+          <span class="brand-model">QO-100 uplink spectrum · 2401 – 2410 MHz</span>
+        </div>
+      </div>
+      <div class="connection">
+        <span id="light"></span><span id="status">Disconnected</span>
+        <div id="chipIdentity" class="chip-identity" hidden>
+          <span id="deviceModel" aria-live="polite" aria-describedby="chipStats" tabindex="0" hidden></span>
+          <div id="chipStats" role="tooltip" hidden></div>
+        </div>
+        <span id="baudStatus" hidden></span>
+        <button id="toggleControls" type="button" aria-controls="controlsPanel" aria-expanded="true" title="Hide or show the receiver controls">Hide controls ›</button>
+        <button id="quitApp" type="button" title="Stop C3SCOPE and release the USB receiver" hidden>Quit C3SCOPE</button>
+        <div class="connect-buttons">
+          <button id="connect">Connect receiver</button
+          ><button
+            id="choosePort"
+            type="button"
+            aria-label="Connection options"
+            title="Connection options"
+            aria-haspopup="menu"
+            aria-expanded="false"
+            aria-controls="connectMenu"
+          >
+            <svg width="12" height="8" viewBox="0 0 12 8" aria-hidden="true">
+              <path
+                d="m2 2 4 4 4-4"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              />
+            </svg>
+          </button>
+          <div id="connectMenu" role="menu" aria-label="Connection options" hidden>
+            <button id="openRecent" type="button" role="menuitem">Connect to Last Device</button
+            ><button id="openOther" type="button" role="menuitem">Choose WebSerial Device…</button
+            ><button id="openUSB" type="button" role="menuitem">Choose WebUSB Device…</button
+            ><a id="openFlasher" role="menuitem" href="flash.html" target="_blank" rel="noopener noreferrer"
+              >Flash Firmware…</a
+            >
+          </div>
+        </div>
+      </div>
+    </header>
+    <main>
+      <section class="display">
+        <div id="error" role="alert" hidden>
+          <span id="errorText"></span
+          ><button
+            id="dismissError"
+            class="banner-close"
+            type="button"
+            aria-label="Dismiss error message"
+            title="Dismiss error message"
+          >
+            <span aria-hidden="true">×</span>
+          </button>
+        </div>
+        <div id="firmwareWarning" role="status" hidden>
+          <span id="firmwareWarningText"></span>
+          <a id="updateFirmware" href="flash.html" target="_blank" rel="noopener noreferrer"
+            >Update receiver…</a
+          ><button
+            id="dismissFirmwareWarning"
+            class="banner-close"
+            type="button"
+            aria-label="Dismiss firmware warning"
+            title="Dismiss firmware warning"
+          >
+            <span aria-hidden="true">×</span>
+          </button>
+        </div>
+        <div id="serialWarning" role="status" aria-live="polite" hidden>
+          <span id="serialWarningText"></span> <button id="lowerBaud" type="button">Switch to 1 MBaud</button
+          ><button
+            id="dismissSerialWarning"
+            class="banner-close"
+            type="button"
+            aria-label="Dismiss capture warning"
+            title="Dismiss capture warning"
+          >
+            <span aria-hidden="true">×</span>
+          </button>
+        </div>
+        <div id="tuningWarning" role="status" hidden>
+          <span id="tuningWarningText"></span
+          ><button
+            id="dismissTuningWarning"
+            class="banner-close"
+            type="button"
+            aria-label="Dismiss tuning warning"
+            title="Dismiss tuning warning"
+          >
+            <span aria-hidden="true">×</span>
+          </button>
+        </div>
+        <div class="screen">
+          <div class="chart">
+            <div class="charthead ann">
+              <span>Ref <b id="annRef">−20 dBFS</b></span>
+              <span><b id="annDiv">10 dB</b> /div</span>
+              <span>RBW <b id="annRbw">—</b></span>
+              <span>Gain <b id="annGain">—</b></span>
+              <span>Det <b id="annDet">AVG</b></span>
+              <span class="ann-marker" id="cursor"></span>
+            </div>
+            <canvas id="spectrum" aria-label="Received power spectrum"></canvas>
+            <div id="axis" class="axis">
+              <canvas
+                id="axisCanvas"
+                aria-label="Frequency axis: wheel to zoom, drag to pan, double-click for the QO-100 view"
+              ></canvas>
+            </div>
+            <canvas
+              id="channels"
+              aria-label="QO-100 WB bandplan V3 channels: very narrow, narrow and wide DATV"
+            ></canvas>
+            <div class="ann ann-span">
+              <span>CF <b id="annCf">—</b></span>
+              <span>Span <b id="annSpan">—</b></span>
+            </div>
+            <div id="meas" hidden></div>
+          </div>
+          <div id="splitter" title="Drag: spectrum / waterfall height · double-click: default"></div>
+          <div class="chart waterfall">
+            <div class="charthead ann"><span>Spectrogram</span><span id="scale">−100 → −20 dBFS</span></div>
+            <canvas id="waterfall" aria-label="Received waterfall history"></canvas>
+            <div id="empty">
+              <div class="empty-icon">NO INPUT</div>
+              <h2>Receiver not connected</h2>
+              <p>Connect the ESP32-C3 receiver to start the sweep.</p>
+            </div>
+          </div>
+        </div>
+        <div class="datv-hints" role="status" aria-live="polite">
+          <span class="datv-label">DATV hints <small>EXPERIMENTAL</small></span>
+          <span id="datvStatus">Waiting for receiver.</span>
+          <span class="datv-note">Spectrum estimate · not decoded</span>
+        </div>
+        <footer>
+          <div><b id="fps">—</b> <span id="fpsLabel">frames/s</span></div>
+          <div><b id="throughput">—</b> <span id="throughputLabel">kS/s delivered</span></div>
+          <div><b id="latency">—</b> <span id="latencyLabel">ms / capture + transfer</span></div>
+          <div>Peak <b id="peak">—</b> MHz</div>
+          <div id="crc">CRC —</div>
+          <div class="rf-note">Local 2.4 GHz RF · relative dBFS · snapshot acquisition · not satellite downlink</div>
+        </footer>
+        <div class="credits">
+          <p id="lanNotice" hidden></p>
+          <div class="source-links">Powered by <a href="https://espargos.net/" target="_blank" rel="noopener noreferrer">ESPARGOS</a></div>
+          <a class="credits-detail" href="credits.html" target="_blank" rel="noopener noreferrer">Credits &amp; source</a>
+        </div>
+      </section>
+      <aside id="controlsPanel" aria-label="Receiver controls">
+        <section class="keys">
+          <h2 class="keys-title">Input</h2>
+          <div class="gain-control">
+            <span id="gainModeLabel">RX gain</span>
+            <div class="gain-modes" role="group" aria-labelledby="gainModeLabel">
+              <button id="gainAgc" type="button" aria-pressed="false" disabled>AGC</button
+              ><button id="gainManual" type="button" aria-pressed="true" disabled>Manual</button>
+            </div>
+          </div>
+          <label
+            >Gain index <output id="gainValue">0</output
+            ><input id="gain" type="range" min="0" max="0" step="1" value="0" disabled
+          /></label>
+          <p id="gainStatus" class="note"></p>
+        </section>
+        <section class="keys">
+          <h2 class="keys-title">Amplitude</h2>
+          <label
+            >Floor <output id="floorValue">−100 dBFS</output
+            ><input id="floor" type="range" min="-140" max="-40" value="-100" /></label
+          ><label
+            >Range <output id="rangeValue">80 dB</output
+            ><input id="range" type="range" min="20" max="120" value="80"
+          /></label>
+          <label class="check" title="Automatically adjust the upper display level to the strongest visible signal."><input id="autoscale" type="checkbox" checked />Auto scale</label>
+          <label class="check" title="Keep the display floor about 5 dB below the visible noise. Does not change RX gain."><input id="autofloor" type="checkbox" checked />Auto floor</label>
+        </section>
+        <section class="keys">
+          <h2 class="keys-title">Trace</h2>
+          <label
+            title="Exponential average over display updates: the share of the previous trace kept in each new one."
+            >Averaging <output id="averageValue">30 %</output
+            ><input id="average" type="range" min="0" max="0.95" step="0.05" value="0.3"
+          /></label>
+          <label class="check"><input id="hold" type="checkbox" />Max hold</label>
+          <div class="actions"><button id="clear">Clear</button></div>
+        </section>
+        <section class="keys">
+          <h2 class="keys-title">Sweep</h2>
+          <div class="actions">
+            <button id="pause" disabled>Pause</button
+            ><button id="qoReset" type="button" title="Back to the full 2401–2410 MHz window">Full span</button>
+          </div>
+        </section>
+        <details class="keys station-advanced">
+          <summary class="keys-title">Setup</summary>
+          <button id="reinstallFirmware" type="button" disabled>Reinstall receiver firmware…</button>
+          <p class="note">Install the bundled firmware for your XIAO ESP32-C3.</p>
+          <button id="eraseReceiver" type="button" disabled>Erase ESP32…</button>
+          <div id="bandwidthControl" class="station-fixed" hidden>
+            <div class="gain-control">
+              <span id="bandwidthModeLabel">Analog bandwidth</span>
+              <div class="gain-modes" role="group" aria-labelledby="bandwidthModeLabel">
+                <button id="bandwidthOpen" type="button" aria-pressed="false" disabled>Open</button
+                ><button id="bandwidthFilter" type="button" aria-pressed="true" disabled>Filter</button>
+              </div>
+            </div>
+            <label
+              >Filter bandwidth <span>MHz</span
+              ><input id="bandwidth" type="number" min="13" max="54" step="1" value="20" disabled
+            /></label>
+          </div>
+          <label
+            class="check"
+            title="The receiver is zero-IF: its 2406 MHz centre shows a DC/LO-leakage spike that is not a signal. Hiding it replaces the 3 centre bins (about ±8 kHz) with the level beside them."
+            ><input id="dcFill" type="checkbox" checked />Hide centre spike</label
+          >
+          <label
+            title="Time combined into each waterfall line. Longer is slower scrolling with more history on screen. Applied when the slider is released."
+            >Waterfall line <output id="specRowValue">50 ms · 20 lines/s</output
+            ><input id="specRowSlider" type="range" min="0" max="200" step="10" value="50"
+          /></label><label
+            >Detector<select id="specDetector" disabled>
+              <option value="mean" selected>average (like burst mode)</option>
+              <option value="max">max-hold (bursts, edges)</option>
+            </select></label
+          >
+        </details>
+        <!-- Fixed by the QO-100 preset (2406 MHz, 16 MS/s on-chip spectra, 2048 bins).
+             Kept, never shown, because the upstream receiver code reads and updates them. -->
+        <div class="station-fixed">
+          <input id="specRow" type="hidden" value="50" disabled />
+          <select id="dcMode">
+            <option value="raw">show as is</option>
+            <option value="fill" selected>fill DC bins</option>
+          </select>
+          <p id="specNote" class="note" hidden></p>
+          <label
+            >Center frequency <span>MHz</span
+            ><input id="frequency" type="number" min="100" max="6000" step="1" value="2406"
+          /></label>
+          <label
+            >Sample rate / nominal span<select id="rate">
+              <option value="4000000">4 MS/s · 4 MHz</option>
+              <option value="6400000" disabled>6.4 MS/s · 6.4 MHz</option>
+              <option value="8000000">8 MS/s · 8 MHz</option>
+              <option value="10000000">10 MS/s · 10 MHz</option>
+              <option value="10666667" disabled>10.667 MS/s · 10.667 MHz</option>
+              <option value="16000000" disabled>16 MS/s · 16 MHz</option>
+              <option value="20000000">20 MS/s · 20 MHz</option>
+              <option value="32000000" disabled>32 MS/s · 32 MHz</option>
+              <option value="40000000">40 MS/s · 40 MHz</option>
+              <option value="80000000" selected>80 MS/s · 80 MHz</option>
+            </select></label
+          >
+          <div class="capture-modes" role="group" aria-labelledby="captureModeLabel">
+            <div id="captureModeLabel" class="eyebrow">Capture mode</div>
+            <div id="specControls" hidden>
+              <button id="specMode" class="capture-mode" type="button" aria-pressed="false" disabled>
+                On-Chip Spectrum
+              </button>
+              <div id="specOptions" class="capture-options" hidden></div>
+            </div>
+            <button id="iqMode" class="capture-mode" type="button" aria-pressed="true">I/Q Streaming</button>
+            <div id="iqControls" class="capture-options">
+              <label id="fftControl"
+                >FFT bins<select id="fft">
+                  <option>256</option>
+                  <option>512</option>
+                  <option>1024</option>
+                  <option selected>2048</option>
+                  <option>4096</option>
+                </select></label
+              ><label
+                >I/Q<select id="bits">
+                  <option value="8">8 + 8 bits</option>
+                  <option value="10">10 + 10 bits</option>
+                </select></label
+              >
+            </div>
+          </div>
+        </div>
+        <details id="gpioControls" hidden>
+          <summary>GPIO</summary>
+          <p class="gpio-help">Z: high impedance · 0: low · 1: high</p>
+          <div id="gpioPins"></div>
+          <p id="gpioEmpty" class="gpio-help" hidden>No GPIO outputs available.</p>
+        </details>
+      </aside>
+    </main>
+  </body>
+</html>
