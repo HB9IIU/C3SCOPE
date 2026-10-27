@@ -15,7 +15,7 @@ C3SCOPE is a simple helper around the excellent **[ESP-SDR](https://github.com/E
 **[ESP-WebSDR](https://github.com/ESPARGOS/esp-web-sdr)** viewer by **ESPARGOS**. Their work does the real job: it turns the
 ESP32-C3's own Wi-Fi radio into a raw I/Q receiver and draws the spectrum in a browser. Please read their projects for how it works and its limits; this page does not repeat them.
 
-# 🔌 PLUG &nbsp;·&nbsp; 🔗 CONNECT &nbsp;·&nbsp; 👁 WATCH
+<h1 align="center">🔌 PLUG &nbsp;·&nbsp; 🔗 CONNECT &nbsp;·&nbsp; 👁 WATCH</h1>
 
 C3SCOPE only wraps it for a **Seeed Studio XIAO ESP32-C3** and for the QO-100 uplink, so that a ham can see the band without a toolchain:
 
