@@ -4,36 +4,49 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width,initial-scale=1" />
     <title>C3SCOPE · Flash your ESP32-C3</title>
-    <meta name="description" content="Flash the C3SCOPE receiver firmware to a Seeed Studio XIAO ESP32-C3 from your browser." />
+    <meta name="description" content="Flash the C3SCOPE receiver firmware to a Seeed Studio XIAO ESP32-C3 from your browser, then download the Windows app." />
+    <meta name="theme-color" content="#0b0f13" />
     <link rel="icon" type="image/svg+xml" href="c3scope.svg" />
     <link rel="icon" type="image/png" sizes="194x194" href="favicon-194x194.png" />
     <link rel="icon" type="image/png" sizes="32x32" href="favicon-32x32.png" />
     <link rel="icon" type="image/png" sizes="16x16" href="favicon-16x16.png" />
     <link rel="stylesheet" href="fonts.css" />
     <link rel="stylesheet" href="flasher/style.css" />
+    <link rel="stylesheet" href="site.css" />
   </head>
   <body>
-    <header>
-      <img src="c3scope.svg" alt="C3SCOPE" />
-      <h1>C3SCOPE · Step 1: flash your ESP32-C3</h1>
+    <header class="hero">
+      <img src="c3scope.svg" alt="" />
+      <h1><b>C3</b>SCOPE</h1>
+      <p class="tag">Flash · Download · Play</p>
+      <p class="lead">
+        A 5 EUR QO-100 spectrum viewer. Two minutes from a blank
+        <strong>Seeed Studio XIAO ESP32-C3</strong> to a live waterfall.
+      </p>
     </header>
-    <p>
-      Turn a <strong>Seeed Studio XIAO ESP32-C3</strong> (about 5 EUR) into a C3SCOPE receiver, right here in your
-      browser. Nothing to install. Then
-      <a href="https://github.com/HB9IIU/C3SCOPE/releases">download the Windows app</a> (step 2) and play (step 3).
-    </p>
-    <section>
-      <h2>Before you start</h2>
-      <ol>
-        <li>Use <strong>Chrome or Edge</strong> on a computer. Safari and most phones cannot flash over serial.</li>
-        <li>Plug the XIAO ESP32-C3 into a USB port with a <strong>data</strong> cable. Close any serial monitor.</li>
-        <li>If connecting fails, hold the <strong>B</strong> (boot) button while plugging the board in, then try again.</li>
-      </ol>
-      <p class="muted">Installing erases everything on the board and replaces it with the C3SCOPE receiver firmware.</p>
-    </section>
-    <section>
-      <h2>1. Connect your board</h2>
-      <p>Click Connect and pick <strong>USB Serial Device</strong> (or <em>USB JTAG/serial</em>) in the browser's list.</p>
+
+    <ol class="steps-nav" aria-label="The three steps">
+      <li><a href="#step1"><b>STEP 1</b>Flash your board</a></li>
+      <li><a href="#step2"><b>STEP 2</b>Download the Windows app</a></li>
+      <li><a href="#step3"><b>STEP 3</b>Play</a></li>
+    </ol>
+
+    <section class="step" id="step1">
+      <div class="step-head">
+        <span class="badge" aria-hidden="true">1</span>
+        <div>
+          <span class="kicker">Step 1 · do this here, in your browser</span>
+          <h2>Flash your ESP32-C3</h2>
+        </div>
+      </div>
+      <ul class="checklist">
+        <li>Use <strong>Chrome or Edge</strong> on a computer. Safari and phones cannot flash over serial.</li>
+        <li>Plug the XIAO ESP32-C3 into USB with a <strong>data</strong> cable. Close any serial monitor.</li>
+        <li>If connecting fails, hold the <strong>B</strong> (boot) button while plugging the board in.</li>
+      </ul>
+
+      <h3><span>A</span>Connect your board</h3>
+      <p class="muted">Click Connect and pick <strong>USB Serial Device</strong> (or <em>USB JTAG/serial</em>) in the browser's list.</p>
       <div class="actions">
         <div class="connect-buttons">
           <button id="connect" disabled>Connect via WebSerial</button
@@ -65,13 +78,12 @@
         <button id="disconnect" disabled>Disconnect</button>
       </div>
       <dl>
-        <dt>Device</dt>
+        <dt>Board</dt>
         <dd id="device">Not connected</dd>
       </dl>
-    </section>
-    <section>
-      <h2>2. Install the receiver firmware</h2>
-      <label for="revision">Firmware</label
+
+      <h3><span>B</span>Install the receiver firmware</h3>
+      <label for="revision" class="muted">Firmware</label
       ><select id="revision" disabled aria-describedby="s3-bridge-hint">
         <option value="">Choose firmware profile…</option>
       </select>
@@ -80,7 +92,8 @@
         <dt>Build date</dt>
         <dd id="version"></dd>
       </dl>
-      <div class="actions"><button id="install" disabled>Install C3SCOPE receiver firmware</button></div>
+      <p class="notice">Installing <strong>erases everything</strong> on the board and replaces it with the C3SCOPE receiver firmware. It takes about a minute. Do not unplug the board.</p>
+      <div class="actions"><button id="install" class="big-button" disabled>Install C3SCOPE receiver firmware</button></div>
       <div id="statusBanner">
         <p id="status" role="status" aria-live="polite">Loading firmware catalog…</p>
         <button
@@ -93,18 +106,43 @@
         </button>
       </div>
       <progress id="progress" max="100" value="0" aria-label="Firmware write progress"></progress>
+      <p class="muted">When it says the firmware is installed, you are done with step 1. Unplug and replug the board.</p>
     </section>
-    <section>
-      <h2>Done? On to step 2</h2>
-      <div class="actions">
-        <a class="button" href="https://github.com/HB9IIU/C3SCOPE/releases">Download C3SCOPE for Windows ↗</a>
+
+    <section class="step" id="step2">
+      <div class="step-head">
+        <span class="badge" aria-hidden="true">2</span>
+        <div>
+          <span class="kicker">Step 2 · on your Windows PC</span>
+          <h2>Download the Windows app</h2>
+        </div>
       </div>
+      <a class="button big-button" href="https://github.com/HB9IIU/C3SCOPE/releases">&#11015; Download C3SCOPE for Windows</a>
+      <p class="muted">
+        Windows 10/11 · no installation. Get <strong>C3SCOPE-portable.zip</strong> from the newest release and unzip it anywhere.
+      </p>
       <a id="open-application" href="https://github.com/HB9IIU/C3SCOPE" hidden>C3SCOPE</a>
     </section>
+
+    <section class="step" id="step3">
+      <div class="step-head">
+        <span class="badge" aria-hidden="true">3</span>
+        <div>
+          <span class="kicker">Step 3 · the fun part</span>
+          <h2>Play</h2>
+        </div>
+      </div>
+      <p>
+        Plug in the flashed XIAO and double-click <strong>C3SCOPE.bat</strong>. Your browser opens, C3SCOPE finds the
+        board by itself, and the live QO-100 spectrum and waterfall (2401–2410 MHz) appear.
+      </p>
+      <p class="muted">Levels are relative, not calibrated. C3SCOPE only listens: never connect a transmitter to the board.</p>
+    </section>
+
     <details>
       <summary>Connection problems</summary>
       <ul>
-        <li>The board is not listed: check the cable carries data, unplug other serial programs, and try another USB socket.</li>
+        <li>The board is not listed: check the cable carries data, close other serial programs, and try another USB socket.</li>
         <li>
           Windows can give the same COM number to your board and to a virtual serial port from other radio software
           (for example FlexRadio, com0com or VSPE). If connecting fails, open Device Manager, Ports (COM &amp; LPT),
@@ -139,8 +177,8 @@
         >
       </nav>
       <p class="muted">
-        Based on the ESPARGOS ESP-WebSDR installer (GPL-3.0-or-later). Firmware: ESPARGOS ESP-SDR. Independent
-        adaptation by HB9IIU; no ESPARGOS endorsement is implied.
+        by HB9IIU · Based on the ESPARGOS ESP-WebSDR installer (GPL-3.0-or-later). Firmware: ESPARGOS ESP-SDR.
+        Independent adaptation; no ESPARGOS endorsement is implied.
       </p>
     </footer>
   </body>

@@ -216,7 +216,7 @@ async function connectDevice(previousPort = null, kind = defaultConnection) {
     lastPort = port;
     updateProfiles(!previousPort);
     status(
-      'Connected. Review the suggested firmware or choose another profile, then select Install ESP-SDR firmware.',
+      'Connected. Review the suggested firmware or choose another profile, then press the Install button.',
     );
   } catch (e) {
     status(

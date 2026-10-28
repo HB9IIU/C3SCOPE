@@ -23,12 +23,19 @@ def main():
         if path.exists():
             shutil.rmtree(path)
     shutil.copy(ROOT / 'tools' / 'web_flasher.html', SITE / 'index.html')
+    shutil.copy(ROOT / 'tools' / 'web_flasher.css', SITE / 'site.css')
     for name in ASSETS:
         shutil.copy(VIEWER / name, SITE / name)
     (SITE / 'flasher').mkdir(parents=True)
     for name in FLASHER_FILES:
         shutil.copy(VIEWER / 'flasher' / name, SITE / 'flasher' / name)
     shutil.copytree(VIEWER / 'flasher' / 'vendor', SITE / 'flasher' / 'vendor')
+    # The installer's own message names its button; this page labels it differently.
+    app = SITE / 'flasher' / 'app.js'
+    text = app.read_text(encoding='utf-8')
+    old = 'then select Install ESP-SDR firmware.'
+    assert old in text, 'installer message changed upstream; update tools/build_web_flasher.py'
+    app.write_text(text.replace(old, 'then press the Install button.'), encoding='utf-8')
 
     manifest = json.loads((VIEWER / 'firmware' / 'manifest.json').read_text(encoding='utf-8'))
     manifest['variants'] = {PROFILE: manifest['variants'][PROFILE]}
