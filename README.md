@@ -2,7 +2,7 @@
 
 ### The 5 EUR QO-100 spectrum viewer
 
-**Plug. Flash. Play.** A small web viewer for the QO-100 DATV uplink band (2401–2410 MHz), from a low-cost ESP32-C3 board. **Windows 10/11.**
+**Flash. Download. Play.** A small web viewer for the QO-100 DATV uplink band (2401–2410 MHz), from a low-cost ESP32-C3 board. **Windows 10/11.**
 
 The board costs about 5 EUR. You also need a 2.4 GHz antenna, and a second C3 if you want to watch your own [C3CAST](https://github.com/HB9IIU/C3CAST) signal: see [Please read before using](#please-read-before-using).
 
@@ -16,22 +16,24 @@ The board costs about 5 EUR. You also need a 2.4 GHz antenna, and a second C3 if
   <b>&#9654; Press to play the demo video</b>
 </p>
 
-<h1 align="center"><a href="https://github.com/HB9IIU/C3SCOPE/releases">&#11015; Download C3SCOPE for Windows</a></h1>
+<h2 align="center">STEP 1 &nbsp;·&nbsp; <a href="https://hb9iiu.github.io/C3SCOPE/">&#9889; Flash your ESP32-C3 here</a></h2>
+<p align="center">In your browser (Chrome or Edge) &nbsp;·&nbsp; nothing to install &nbsp;·&nbsp; about a minute</p>
+
+<h2 align="center">STEP 2 &nbsp;·&nbsp; <a href="https://github.com/HB9IIU/C3SCOPE/releases">&#11015; Download the Windows app</a></h2>
 <p align="center">Windows 10/11 &nbsp;·&nbsp; no installation &nbsp;·&nbsp; unzip and double-click</p>
+
+<h2 align="center">STEP 3 &nbsp;·&nbsp; &#9654; Play</h2>
+<p align="center">Plug in the receiver, double-click <b>C3SCOPE.bat</b>, watch your signal</p>
 
 C3SCOPE is a simple helper around the excellent **[ESP-SDR](https://github.com/ESPARGOS/esp-sdr)** receiver firmware and
 **[ESP-WebSDR](https://github.com/ESPARGOS/esp-web-sdr)** viewer by **ESPARGOS**. Their work does the real job: it turns the
 ESP32-C3's own Wi-Fi radio into a receiver and makes its spectrum available in a browser. Please read their projects for how it works and its limits; this page does not repeat them.
 
-<h1 align="center">🔌 PLUG &nbsp;·&nbsp; ⚡ FLASH &nbsp;·&nbsp; ▶ PLAY</h1>
-
 C3SCOPE only wraps it for a **Seeed Studio XIAO ESP32-C3** and for the QO-100 uplink, so that a ham can see the band without a toolchain:
 
-1. **Plug** a second XIAO into a USB port (the native USB port, no extra adapter).
-2. **Flash** it from the page: C3SCOPE finds the board, offers the bundled receiver firmware, and asks before erasing anything. A brand-new blank board works too.
-3. **Play**: watch the live spectrum and waterfall, zoom into a signal, and let C3SCOPE estimate its centre frequency and symbol rate.
-
-Already running compatible receiver firmware? It connects automatically and goes straight to the spectrum.
+1. **Flash** the XIAO in your browser with the [web flasher](https://hb9iiu.github.io/C3SCOPE/): one button, about a minute. A brand-new blank board works too.
+2. **Download** the Windows app and unzip it.
+3. **Play**: C3SCOPE finds the board by itself and shows the live spectrum and waterfall. Zoom into a signal and let C3SCOPE estimate its centre frequency and symbol rate.
 
 by HB9IIU
 
@@ -63,13 +65,24 @@ Use a **separate** board for C3SCOPE: your C3CAST transmitter can stay plugged i
 
 ## Quick start (Windows)
 
-No installation, no Python, no drivers to set up:
+No installation, no Python, no drivers to set up.
 
-1. Download the portable package **C3SCOPE-portable.zip** from the [Releases page](https://github.com/HB9IIU/C3SCOPE/releases) and unzip it anywhere.
-2. Double-click **C3SCOPE.bat**. A console window opens and your browser shows the page. Windows may ask for confirmation, because the files are not code-signed.
-3. Plug in the XIAO with a USB **data** cable and close any serial monitor that has its port open. C3SCOPE connects by itself.
-4. If the board is blank, choose **Install receiver firmware…** on the waiting screen. Check the selected board and confirm the erase warning. C3SCOPE installs and verifies the firmware, then connects automatically.
-5. **Watch your signal.** Use **Full span** to return to 2401–2410 MHz and **Hide controls** for a wider plot.
+### Step 1: flash your ESP32-C3 (once)
+
+1. Open the **[C3SCOPE web flasher](https://hb9iiu.github.io/C3SCOPE/)** in **Chrome or Edge** on a computer.
+2. Plug the XIAO ESP32-C3 into USB with a **data** cable and close any serial monitor.
+3. Click **Connect**, pick *USB Serial Device* in the browser's list, then click **Install C3SCOPE receiver firmware**. This erases the board and takes about a minute.
+
+Your board already runs the receiver firmware? Skip this step. The Windows app can also install it for you from its waiting screen, using **Install receiver firmware…**.
+
+### Step 2: download the Windows app
+
+Download **C3SCOPE-portable.zip** from the [Releases page](https://github.com/HB9IIU/C3SCOPE/releases) and unzip it anywhere.
+
+### Step 3: play
+
+1. Plug in the flashed XIAO and double-click **C3SCOPE.bat**. A console window opens and your browser shows the page. Windows may ask for confirmation, because the files are not code-signed.
+2. C3SCOPE connects by itself. **Watch your signal.** Use **Full span** to return to 2401–2410 MHz and **Hide controls** for a wider plot.
 
 If the page says **C3CAST transmitter detected**, leave that board as it is and plug in a second XIAO for the receiver.
 
@@ -99,6 +112,7 @@ The accuracy of the DATV hints and of the band edges is still being compared aga
 
 - **Windows 10/11** is what the portable package is built for. Python and a browser are all that is needed to run from source on other systems, but that is untested.
 - **The receiver is not found:** check that the cable carries data and that no other program (serial monitor, browser flasher) has the port open.
+- **"Windows lists more than one device as COMxx":** Windows gave your board the same COM number as a virtual serial port from other radio software (FlexRadio, com0com, VSPE). Open Device Manager, Ports (COM & LPT), double-click the board's *USB Serial Device*, Port Settings, Advanced, pick another COM port number, then unplug and replug the board.
 - **C3CAST transmitter detected:** keep it as your transmitter and plug in a second XIAO. Choosing **Convert to C3SCOPE…** replaces its firmware; it will no longer work as a transmitter until C3CAST firmware is reinstalled.
 - **Erase ESP32…** leaves the board blank. It does not install replacement firmware. Files and settings on your PC are not erased.
 - **Another viewer is connected:** one browser tab controls the receiver at a time. Close the other viewer before switching PCs. Starting C3SCOPE again reuses the running app.
