@@ -107,6 +107,18 @@ class SetupReportStabilityTests(unittest.TestCase):
         self.assertEqual(receiver.reports['COM12'].get('state'), 'unrecognized')
         self.assertEqual(backend.probe_status['state'], 'unrecognized')
 
+    def test_virtual_port_sharing_the_com_name_is_explained_on_the_waiting_screen(self):
+        board = self.board()
+        virtual = SimpleNamespace(device='COM12', vid=None, pid=None, serial_number=None, location=None,
+                                  hwid='FABULATECH\VSP\1', description='FlexRadio Virtual Serial Port (COM12)')
+        receiver = self.receiver([(None, self.good_report(board))])
+        self.step(receiver, [virtual, board])
+        self.step(receiver, [virtual, board])
+        self.assertEqual(backend.probe_status['state'], 'unrecognized')
+        self.assertIn('FlexRadio Virtual Serial Port', backend.probe_status['message'])
+        self.assertIn('Device Manager', backend.probe_status['message'])
+        self.assertNotIn('Device Manager', receiver.reports['COM12']['message'])  # report itself untouched
+
     def test_a_different_device_on_the_same_com_name_replaces_the_report(self):
         board = self.board()
         receiver = self.receiver([(None, self.good_report(board)), (None, {})])

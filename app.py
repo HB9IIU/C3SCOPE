@@ -191,7 +191,8 @@ class Receiver:
     def scan_concurrently(self):
         # Enumerate frequently; a slow/unrelated port never blocks hot-plug
         # discovery or a browser claiming an already identified receiver.
-        ports = {p.device: p for p in list_ports.comports() if p.vid is not None}
+        listed = list(list_ports.comports())
+        ports = {p.device: p for p in listed if p.vid is not None}
         with self.lock:
             if self.setup_reserved:
                 return
@@ -248,6 +249,15 @@ class Receiver:
             report = next((r for r in self.reports.values() if r.get('state') == 'incompatible'), None)
             report = report or next((r for r in self.reports.values() if r.get('state') == 'unrecognized'), None)
             probe_status.update(report or {'state': 'searching', 'message': 'Connect an ESP-SDR receiver by USB. Detection is automatic.'})
+            clash = [p.description for p in listed if report and p.device == report.get('device') and p.vid is None]
+            if clash:
+                # Virtual COM ports from radio software can share a name with the
+                # board; Windows then sends that name to only one of them.
+                probe_status['message'] += (
+                    f"\n\nWindows also lists {'; '.join(clash)}. Two devices cannot share a COM name, so this board "
+                    'cannot be reached. In Device Manager, open Ports (COM & LPT), double-click the board '
+                    '(USB Serial Device), choose Port Settings, Advanced, pick another COM port number, '
+                    'then unplug and replug it.')
             if not self.port:
                 for info in sorted(ports.values(), key=lambda p: p.vid != 0x303a):
                     if info.device not in self.probes and time.monotonic() >= self.next_probe.get(info.device, 0):

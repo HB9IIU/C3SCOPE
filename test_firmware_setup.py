@@ -125,6 +125,22 @@ class SetupTests(unittest.TestCase):
                     self.installer.start(prepared['token'], True, True)
                 process.assert_not_called()
 
+    def test_virtual_port_with_the_same_com_name_gets_a_clear_message(self):
+        prepared = self.installer.prepare(self.info.device)
+        virtual = SimpleNamespace(device=self.info.device, vid=None, pid=None, serial_number=None, location=None,
+                                  hwid='FABULATECH\VSP\1', description='FlexRadio Virtual Serial Port')
+        with patch('firmware_setup.list_ports.comports', return_value=[virtual, self.info]):
+            with patch('firmware_setup.subprocess.Popen') as process:
+                with self.assertRaisesRegex(ValueError, 'more than one device.*FlexRadio.*Device Manager'):
+                    self.installer.start(prepared['token'], True, True)
+                process.assert_not_called()
+
+    def test_board_is_found_even_when_a_virtual_port_is_listed_first_under_another_name(self):
+        virtual = SimpleNamespace(device='COM99', vid=None, pid=None, serial_number=None, location=None,
+                                  hwid='FABULATECH\VSP\1', description='FlexRadio Virtual Serial Port')
+        with patch('firmware_setup.list_ports.comports', return_value=[virtual, self.info]):
+            SetupInstaller.require_same_device({'device': self.info.device, 'fingerprint': fingerprint(self.info)})
+
     def test_confirmed_install_uses_fixed_c3_layout_and_releases_scanner(self):
         prepared = self.installer.prepare(self.info.device)
         fake = SimpleNamespace(stdout=io.StringIO('Writing 50%\nHash of data verified.\n'), wait=lambda: 0,

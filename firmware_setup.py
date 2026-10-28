@@ -140,14 +140,22 @@ class SetupInstaller:
         # the same board a short time to reappear before calling it changed.
         deadline = time.monotonic() + wait
         while True:
-            current = next((p for p in list_ports.comports() if p.device == candidate['device']), None)
-            if current and tuple(candidate['fingerprint']) == fingerprint(current):
-                break
-            if time.monotonic() >= deadline:
+            # Windows can list two devices under one COM name (virtual ports from
+            # radio software), so match on the full identity, not the name alone.
+            same_name = [p for p in list_ports.comports() if p.device == candidate['device']]
+            current = next((p for p in same_name if tuple(candidate['fingerprint']) == fingerprint(p)), None)
+            if current or time.monotonic() >= deadline:
                 break
             time.sleep(.25)
-        if not current or tuple(candidate['fingerprint']) != fingerprint(current):
+        if not current:
             raise ValueError('The selected device changed or was unplugged. Nothing was erased; review the board again.')
+        others = [p.description for p in same_name if p is not current]
+        if others:
+            raise ValueError(
+                f"Windows lists more than one device as {candidate['device']} ({'; '.join(others)}), so this board "
+                'cannot be reached reliably. Nothing was erased. In Device Manager, open Ports (COM & LPT), '
+                'double-click this board, choose Port Settings, Advanced, pick a different COM port number, '
+                'then unplug and replug the board.')
         if (current.vid, current.pid) != (0x303a, 0x1001):
             raise ValueError('Guided flashing supports the XIAO ESP32-C3 native USB connection only.')
 
