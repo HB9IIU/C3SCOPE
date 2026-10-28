@@ -3,8 +3,8 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width,initial-scale=1" />
-    <title>C3SCOPE · Flash your ESP32-C3</title>
-    <meta name="description" content="Flash the C3SCOPE receiver firmware to a Seeed Studio XIAO ESP32-C3 from your browser, then download the Windows app." />
+    <title>C3SCOPE · Flash your ESP32</title>
+    <meta name="description" content="Flash the C3SCOPE receiver firmware to a Seeed Studio XIAO ESP32-C3 (or another ESP32 board) from your browser, then download the Windows app." />
     <meta name="theme-color" content="#0b0f13" />
     <link rel="icon" type="image/svg+xml" href="c3scope.svg" />
     <link rel="icon" type="image/png" sizes="194x194" href="favicon-194x194.png" />
@@ -21,7 +21,7 @@
       <p class="tag">Flash · Download · Play</p>
       <p class="lead">
         A 5 EUR QO-100 spectrum viewer. Two minutes from a blank
-        <strong>Seeed Studio XIAO ESP32-C3</strong> to a live waterfall.
+        <strong>Seeed Studio XIAO ESP32-C3</strong> to a live waterfall. Other ESP32 boards can be flashed too.
       </p>
     </header>
 
@@ -36,17 +36,17 @@
         <span class="badge" aria-hidden="true">1</span>
         <div>
           <span class="kicker">Step 1 · do this here, in your browser</span>
-          <h2>Flash your ESP32-C3</h2>
+          <h2>Flash your ESP32</h2>
         </div>
       </div>
       <ul class="checklist">
         <li>Use <strong>Chrome or Edge</strong> on a computer. Safari and phones cannot flash over serial.</li>
-        <li>Plug the XIAO ESP32-C3 into USB with a <strong>data</strong> cable. Close any serial monitor.</li>
+        <li>Plug your board into USB with a <strong>data</strong> cable. Close any serial monitor.</li>
         <li>If connecting fails, hold the <strong>B</strong> (boot) button while plugging the board in.</li>
       </ul>
 
       <h3><span>A</span>Connect your board</h3>
-      <p class="muted">Click Connect and pick <strong>USB Serial Device</strong> (or <em>USB JTAG/serial</em>) in the browser's list.</p>
+      <p class="muted">Click Connect and pick <strong>USB Serial Device</strong> (or <em>USB JTAG/serial</em>) in the browser's list. The page recognises the chip and selects the matching firmware for you.</p>
       <div class="actions">
         <div class="connect-buttons">
           <button id="connect" disabled>Connect via WebSerial</button
@@ -92,8 +92,13 @@
         <dt>Build date</dt>
         <dd id="version"></dd>
       </dl>
-      <p class="notice">Installing <strong>erases everything</strong> on the board and replaces it with the C3SCOPE receiver firmware. It takes about a minute. Do not unplug the board.</p>
-      <div class="actions"><button id="install" class="big-button" disabled>Install C3SCOPE receiver firmware</button></div>
+      <p class="notice">Installing <strong>erases everything</strong> on the board and replaces it with the receiver firmware. It takes about a minute. Do not unplug the board.</p>
+      <p class="muted">
+        The <strong>Seeed Studio XIAO ESP32-C3</strong> is the board C3SCOPE is made and tested for. Other ESP32 chips
+        are offered too (ESP32, C2, C5, C6, C61, H2, S2, S3, S31); they run the same ESP-SDR receiver, but have not
+        been tested with C3SCOPE's QO-100 settings.
+      </p>
+      <div class="actions"><button id="install" class="big-button" disabled>Install receiver firmware</button></div>
       <div id="statusBanner">
         <p id="status" role="status" aria-live="polite">Loading firmware catalog…</p>
         <button
