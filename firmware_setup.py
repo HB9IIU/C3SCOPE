@@ -135,8 +135,17 @@ class SetupInstaller:
             return self.job['id']
 
     @staticmethod
-    def require_same_device(candidate):
-        current = next((p for p in list_ports.comports() if p.device == candidate['device']), None)
+    def require_same_device(candidate, wait=4.0):
+        # An ESP32 can drop off USB for a second or two while it resets, so give
+        # the same board a short time to reappear before calling it changed.
+        deadline = time.monotonic() + wait
+        while True:
+            current = next((p for p in list_ports.comports() if p.device == candidate['device']), None)
+            if current and tuple(candidate['fingerprint']) == fingerprint(current):
+                break
+            if time.monotonic() >= deadline:
+                break
+            time.sleep(.25)
         if not current or tuple(candidate['fingerprint']) != fingerprint(current):
             raise ValueError('The selected device changed or was unplugged. Nothing was erased; review the board again.')
         if (current.vid, current.pid) != (0x303a, 0x1001):

@@ -32,6 +32,8 @@ app.config['TRUSTED_HOSTS'] = ['localhost', '127.0.0.1', '[::1]']
 app.config['MAX_CONTENT_LENGTH'] = 16384
 sock = Sock(app)
 IDENTITY = re.compile(rb'^(ESP32|C2|C3|C5|C6|C61|H2|S2|S3|S31)SDR 6 burst \d+$')
+REPORT_GRACE = 12  # seconds a board may be missing from USB before it is forgotten
+REPORT_KEEP = 30   # seconds a good probe result outlives failed re-probes
 probe_status = {'state': 'searching', 'message': 'Connect an ESP-SDR receiver by USB. Detection is automatic.'}
 
 
@@ -129,6 +131,8 @@ class Receiver:
         self.probe_fingerprints = {}
         self.next_probe = {}
         self.reports = {}
+        self.report_time = {}
+        self.missing_since = {}
         self.setup_reserved = False
 
     def close(self):
@@ -204,11 +208,21 @@ class Receiver:
                 if device not in ports or (expected and tuple(expected) != fingerprint(ports[device])):
                     if found:
                         found[0].close()
-                    self.reports.pop(device, None)
-                    self.next_probe.pop(device, None)
+                    if device in ports:
+                        # A different USB device now uses this COM name.
+                        self.reports.pop(device, None)
+                        self.next_probe.pop(device, None)
+                    # Otherwise the board is only missing for the moment (an ESP32
+                    # re-enumerates when it resets); the grace period below keeps
+                    # what we already know instead of flashing back to "searching".
                     continue
-                if device in ports:
+                now = time.monotonic()
+                previous = self.reports.get(device)
+                if report or not previous or now - self.report_time.get(device, 0) > REPORT_KEEP:
+                    # An empty report means this probe could not open the port.
+                    # Do not let one failed attempt erase a recent good result.
                     self.reports[device] = report
+                    self.report_time[device] = now
                 if found:
                     if device in ports and not self.port:
                         self.port, self.identity = found
@@ -216,12 +230,20 @@ class Receiver:
                         logging.info('Detected %s on %s', self.identity, device)
                     else:
                         found[0].close()
+            now = time.monotonic()
+            for device in list(self.missing_since):
+                if device in ports:
+                    del self.missing_since[device]
             for device in set(self.reports) - set(ports):
-                self.reports.pop(device, None)
-                self.next_probe.pop(device, None)
-            for device, report in list(self.reports.items()):
-                if report.get('fingerprint') and tuple(report['fingerprint']) != fingerprint(ports[device]):
+                if now - self.missing_since.setdefault(device, now) > REPORT_GRACE:
                     self.reports.pop(device, None)
+                    self.report_time.pop(device, None)
+                    self.next_probe.pop(device, None)
+                    self.missing_since.pop(device, None)
+            for device, report in list(self.reports.items()):
+                if device in ports and report.get('fingerprint') and tuple(report['fingerprint']) != fingerprint(ports[device]):
+                    self.reports.pop(device, None)
+                    self.report_time.pop(device, None)
                     self.next_probe.pop(device, None)
             report = next((r for r in self.reports.values() if r.get('state') == 'incompatible'), None)
             report = report or next((r for r in self.reports.values() if r.get('state') == 'unrecognized'), None)

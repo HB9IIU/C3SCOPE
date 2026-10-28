@@ -4,7 +4,7 @@ import os
 import signal
 import subprocess
 import sys
-from concurrent.futures import ThreadPoolExecutor
+from concurrent.futures import Future, ThreadPoolExecutor
 import unittest
 from types import SimpleNamespace
 from unittest.mock import patch
@@ -40,6 +40,82 @@ class FakeSerial:
 
     def close(self):
         self.closed = True
+
+
+class ImmediateExecutor:
+    """Runs probes at once so scan_concurrently can be stepped deterministically."""
+    def __init__(self, results):
+        self.results = results
+
+    def submit(self, fn, info):
+        future = Future()
+        future.set_result(self.results.pop(0))
+        return future
+
+
+class SetupReportStabilityTests(unittest.TestCase):
+    def board(self):
+        return SimpleNamespace(device='COM12', vid=0x303a, pid=0x1001, serial_number='80:F1',
+                               location=None, hwid='USB VID:PID=303A:1001 SER=80:F1')
+
+    def good_report(self, board):
+        return {'device': board.device, 'fingerprint': backend.fingerprint(board), 'setup_eligible': True,
+                'firmware_kind': 'unknown', 'state': 'unrecognized', 'message': 'blank board'}
+
+    def receiver(self, results):
+        receiver = backend.Receiver()
+        receiver.executor = ImmediateExecutor(results)
+        return receiver
+
+    def step(self, receiver, ports):
+        with patch.object(backend.list_ports, 'comports', return_value=ports):
+            receiver.scan_concurrently()
+
+    def test_board_that_drops_off_usb_briefly_is_not_forgotten(self):
+        board = self.board()
+        receiver = self.receiver([(None, self.good_report(board))])
+        self.step(receiver, [board])   # submit probe
+        self.step(receiver, [board])   # collect it
+        self.assertEqual(backend.probe_status['state'], 'unrecognized')
+        self.step(receiver, [])        # the ESP32 resets and re-enumerates
+        self.assertIn('COM12', receiver.reports)
+        self.assertEqual(backend.probe_status['state'], 'unrecognized')
+        self.step(receiver, [board])
+        self.assertIn('COM12', receiver.reports)
+
+    def test_board_is_forgotten_after_the_grace_period(self):
+        board = self.board()
+        receiver = self.receiver([(None, self.good_report(board))])
+        self.step(receiver, [board])
+        self.step(receiver, [board])
+        start = backend.time.monotonic()
+        with patch.object(backend.time, 'monotonic', return_value=start):
+            self.step(receiver, [])
+        with patch.object(backend.time, 'monotonic', return_value=start + backend.REPORT_GRACE + 1):
+            self.step(receiver, [])
+        self.assertNotIn('COM12', receiver.reports)
+        self.assertEqual(backend.probe_status['state'], 'searching')
+
+    def test_failed_reprobe_does_not_erase_a_good_result(self):
+        board = self.board()
+        receiver = self.receiver([(None, self.good_report(board)), (None, {})])
+        self.step(receiver, [board])
+        self.step(receiver, [board])
+        receiver.next_probe['COM12'] = 0   # the next probe runs now, and cannot open the port
+        self.step(receiver, [board])
+        self.step(receiver, [board])
+        self.assertEqual(receiver.reports['COM12'].get('state'), 'unrecognized')
+        self.assertEqual(backend.probe_status['state'], 'unrecognized')
+
+    def test_a_different_device_on_the_same_com_name_replaces_the_report(self):
+        board = self.board()
+        receiver = self.receiver([(None, self.good_report(board)), (None, {})])
+        self.step(receiver, [board])
+        self.step(receiver, [board])
+        other = SimpleNamespace(device='COM12', vid=0x303a, pid=0x1001, serial_number='AA:BB',
+                                location=None, hwid='USB VID:PID=303A:1001 SER=AA:BB')
+        self.step(receiver, [other])
+        self.assertNotEqual(receiver.reports.get('COM12', {}).get('fingerprint'), backend.fingerprint(board))
 
 
 class BackendTests(unittest.TestCase):
